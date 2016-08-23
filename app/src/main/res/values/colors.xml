@@ -2,5 +2,12 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
+    <color name="standard_background">#fff</color>
+    <color name="primaryText">#96000000</color>
+    <color name="light_gray">#32000000</color>
+    <color name="posterBackground">#bd5c69b1</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorItem">#06ffffff</color>
+    <color name="darker_gray">#767676</color>
+    <color name="item_pressed">#868686</color>
 </resources>
