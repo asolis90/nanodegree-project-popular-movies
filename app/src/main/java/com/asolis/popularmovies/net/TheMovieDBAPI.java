@@ -18,15 +18,15 @@ public interface TheMovieDBAPI {
 
     interface params {
         String ID = "id";
+        String SORT_TYPE = "sort-type";
         String API_KEY = "api_key";
-        String SORT_BY = "sort_by";
         String PAGE = "page";
     }
 
-    @GET("/discover/movie")
+    @GET("/movie/{sort-type}")
     void getMovies(
+            @Path(params.SORT_TYPE) String sortType,
             @Query(params.API_KEY) String apiKey,
-            @Query(params.SORT_BY) String sortBy,
             @Query(params.PAGE) String page,
             Callback<Base<Movie>> callback
     );
