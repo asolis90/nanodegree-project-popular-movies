@@ -6,8 +6,8 @@ package com.asolis.popularmovies.net;
 
 public class TheMovieDBAPIHelper {
 
-    public static final String SORT_BY_POPULARITY = "popularity.desc";
-    public static final String SORT_BY_HIGHEST_RATE = "vote_average.desc";
+    public static final String SORT_BY_POPULAR = "popular";
+    public static final String SORT_BY_TOP_RATE = "top_rated";
     private static final String API_KEY = "";
 
 

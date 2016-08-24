@@ -135,8 +135,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void fetchMore() {
-        TheMovieDB.api().getMovies(TheMovieDBAPIHelper.getApiKey(),
-                PreferenceManager.getSortingType(getContext()).getPath(),
+        TheMovieDB.api().getMovies(PreferenceManager.getSortingType(getContext()).getPath(),
+                TheMovieDBAPIHelper.getApiKey(),
                 String.valueOf((moviesAdapter.getCurrentPage() + 1)),
                 new Callback<Base<Movie>>() {
                     @Override

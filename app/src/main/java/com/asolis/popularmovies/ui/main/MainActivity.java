@@ -79,9 +79,9 @@ public class MainActivity extends BaseActivity {
                                     loadMovies(SortingType.POPULAR);
                                 }
                                 break;
-                            case HIGHEST_RATE:
-                                if (sortType != SortingType.HIGHEST_RATE) {
-                                    loadMovies(SortingType.HIGHEST_RATE);
+                            case TOP_RATED:
+                                if (sortType != SortingType.TOP_RATED) {
+                                    loadMovies(SortingType.TOP_RATED);
                                 }
                                 break;
                         }
@@ -92,7 +92,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void loadMovies(final SortingType type) {
-        TheMovieDB.api().getMovies(TheMovieDBAPIHelper.getApiKey(), type.getPath(),
+        TheMovieDB.api().getMovies(type.getPath(), TheMovieDBAPIHelper.getApiKey(),
                 String.valueOf(DEFAULT_PAGE), new Callback<Base<Movie>>() {
                     @Override
                     public void success(Base<Movie> moviesBase, Response response) {

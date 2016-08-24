@@ -34,8 +34,8 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        TheMovieDB.api().getMovies(TheMovieDBAPIHelper.getApiKey(),
-                PreferenceManager.getSortingType(getApplicationContext()).getPath(),
+        TheMovieDB.api().getMovies(PreferenceManager.getSortingType(getApplicationContext())
+                .getPath(), TheMovieDBAPIHelper.getApiKey(),
                 DEFAULT_PAGE, new Callback<Base<Movie>>() {
                     @Override
                     public void success(Base<Movie> moviesBase, Response response) {
