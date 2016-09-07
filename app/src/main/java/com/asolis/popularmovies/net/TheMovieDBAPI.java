@@ -1,5 +1,6 @@
 package com.asolis.popularmovies.net;
 
+import com.asolis.popularmovies.net.models.MovieReview;
 import com.asolis.popularmovies.net.models.MovieVideo;
 import com.asolis.popularmovies.net.models.Movie;
 import com.asolis.popularmovies.net.models.base.Base;
@@ -38,11 +39,17 @@ public interface TheMovieDBAPI {
             Callback<Base<Movie>> callback
     );
 
-
     @GET("/movie/{id}/videos")
     void getMovieVideos(
             @Path(params.ID) String id,
             @Query(params.API_KEY) String apiKey,
             Callback<Base<MovieVideo>> callback
+    );
+
+    @GET("/movie/{id}/reviews")
+    void getMovieReviews(
+            @Path(params.ID) String id,
+            @Query(params.API_KEY) String apiKey,
+            Callback<Base<MovieReview>> callback
     );
 }
