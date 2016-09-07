@@ -35,6 +35,12 @@
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
 
+        <!-- Provider -->
+        <provider
+            android:name=".data.DbProvider"
+            android:authorities="com.asolis.popularmovies.data.DbProvider"
+            android:exported="false"
+            />
     </application>
 
 </manifest>
