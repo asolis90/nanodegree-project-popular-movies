@@ -16,7 +16,9 @@ public class Movie implements Parcelable {
     private String overview;
     private String runtime;
     private String vote_average;
-    private String rating;
+
+    public Movie() {
+    }
 
     public Movie(Parcel in) {
         id = in.readString();
@@ -35,14 +37,6 @@ public class Movie implements Parcelable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getRating() {
-        return rating;
-    }
-
-    public void setRating(String rating) {
-        this.rating = rating;
     }
 
     public String getVoteAverage() {
@@ -83,6 +77,10 @@ public class Movie implements Parcelable {
 
     public void setPosterPath(String url) {
         this.poster_path = url;
+    }
+
+    public void setBackdropPath(String backdrop_path) {
+        this.backdrop_path = backdrop_path;
     }
 
     public String getBackdropPath() {
