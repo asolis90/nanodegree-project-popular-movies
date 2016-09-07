@@ -127,7 +127,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public void addItems(List<Movie> list) {
-        data.addAll(list);
+        if(list != null){
+            data.addAll(list);
+        }
         notifyDataSetChanged();
     }
 
