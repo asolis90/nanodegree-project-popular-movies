@@ -10,11 +10,13 @@
     <string name="network_connection_error">Network Connection Error</string>
     <string name="overview">Overview</string>
     <string name="videos">Videos</string>
+    <string name="reviews">Reviews</string>
     <string name="detail_iv_poster_transition" translatable="false">iv-poster</string>
     <string name="loading">Loading</string>
     <string name="detail_vote_avergae">%1$s /10</string>
     <string-array name="sorting_by_array">
         <item>Popular</item>
         <item>Highest Rated</item>
+        <item>Favorites</item>
     </string-array>
 </resources>

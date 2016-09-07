@@ -1,12 +1,21 @@
 package com.asolis.popularmovies.ui.main;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 import com.asolis.popularmovies.R;
+import com.asolis.popularmovies.data.DbContract;
+import com.asolis.popularmovies.data.DbProvider;
 import com.asolis.popularmovies.net.TheMovieDB;
 import com.asolis.popularmovies.net.TheMovieDBAPIHelper;
 import com.asolis.popularmovies.net.models.Movie;
@@ -18,27 +27,77 @@ import com.asolis.popularmovies.util.SortingType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private final int UPDATE_RESULT_CODE = 2;
     private final String FRAGMENT_HOME_TAG = "HOME";
     private final int DEFAULT_PAGE = 1;
+    private List<Movie> mFavoriteMovieList = new ArrayList<>();
+    private boolean mIsLoaderInitialized;
+    private boolean mIsTwoPane;
+    private static String ARG_IS_TWO_PANE = "is_two_pane";
+
+    @Nullable
+    @Bind(R.id.activity_main_fragment_details) FrameLayout mDetailsFrameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
+        if (mDetailsFrameLayout != null) {
+            mIsTwoPane = true;
+        }
+
         if (savedInstanceState == null) {
             setMainContainer(getIntent().getExtras());
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_RESULT_CODE) {
+            getSupportLoaderManager().restartLoader(0, null, this);
+        }
+    }
+
+    private ArrayList<Movie> getFavorites(Cursor cursor) {
+        ArrayList<Movie> movies = new ArrayList<>();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    // do what you need with the cursor here
+                    Movie movie = new Movie();
+                    movie.setId(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_ID_COLUMN)));
+                    movie.setTitle(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_TITLE_COLUMN)));
+                    movie.setOverview(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_OVERVIEW_COLUMN)));
+                    movie.setRelease_date(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_RELEASE_DATE_COLUMN)));
+                    movie.setVoteAverage(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_VOTE_AVERAGE_COLUMN)));
+                    movie.setPosterPath(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_POSTER_PATH_COLUMN)));
+                    movie.setBackdropPath(cursor.getString(cursor.getColumnIndex(DbContract.Columns.FAV_BACKDROP_PATH_COLUMN)));
+                    movies.add(movie);
+                } while (cursor.moveToNext());
+
+                cursor.close();
+                return movies;
+            }
+        }
+        return null;
+    }
+
     private void setMainContainer(Bundle bundle) {
         HomeFragment homeFragment = new HomeFragment();
+        bundle.putBoolean(ARG_IS_TWO_PANE, mIsTwoPane);
         homeFragment.setArguments(bundle);
         getSupportFragmentManager()
                 .beginTransaction()
@@ -84,11 +143,31 @@ public class MainActivity extends BaseActivity {
                                     loadMovies(SortingType.TOP_RATED);
                                 }
                                 break;
+
+                            case FAVORITES:
+                                if (sortType != SortingType.FAVORITES) {
+                                    loadFavorites();
+                                }
+                                break;
                         }
                     }
                 });
         builder.create();
         builder.show();
+    }
+
+    private void loadFavorites() {
+        PreferenceManager.setSortingType(getApplicationContext(), SortingType.FAVORITES);
+
+        if (!mIsLoaderInitialized) {
+            this.getSupportLoaderManager().initLoader(0, null, this);
+        } else {
+            HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FRAGMENT_HOME_TAG);
+            if (homeFragment != null && homeFragment.isVisible()) {
+                homeFragment.setData(mFavoriteMovieList);
+            }
+        }
     }
 
     private void loadMovies(final SortingType type) {
@@ -130,5 +209,38 @@ public class MainActivity extends BaseActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(
+                getApplicationContext(),
+                DbProvider.CONTENT_URI_FAVORITES,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (mFavoriteMovieList != null) {
+            mFavoriteMovieList.clear();
+        }
+        mFavoriteMovieList = getFavorites(cursor);
+
+        if (PreferenceManager.getSortingType(getApplicationContext()) == SortingType.FAVORITES) {
+            HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FRAGMENT_HOME_TAG);
+            if (homeFragment != null && homeFragment.isVisible()) {
+                homeFragment.setData(mFavoriteMovieList);
+            }
+        }
+        mIsLoaderInitialized = true;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }

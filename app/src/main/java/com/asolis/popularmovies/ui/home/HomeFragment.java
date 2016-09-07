@@ -18,12 +18,16 @@ import com.asolis.popularmovies.net.models.Movie;
 import com.asolis.popularmovies.net.models.base.Base;
 import com.asolis.popularmovies.recyclerview.adapter.MoviesAdapter;
 import com.asolis.popularmovies.ui.moviedetails.MovieDetailsActivity;
+import com.asolis.popularmovies.ui.moviedetails.MovieDetailsFragment;
 import com.asolis.popularmovies.util.PreferenceManager;
+import com.asolis.popularmovies.util.SortingType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -34,24 +38,37 @@ import retrofit.client.Response;
 
 public class HomeFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    @Bind(R.id.fragment_home_rv)
+    RecyclerView recyclerView;
     private MoviesAdapter moviesAdapter;
     private final String ARG_MOVIES = "movies";
     private final String ARG_PAGE = "page";
     private final int DEFAULT_PAGE = 1;
     private int page = 1;
     private boolean firstLoad = true;
+    private boolean mIsTwoPane;
+    private static String ARG_IS_TWO_PANE = "is_two_pane";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_fragment, container, false);
+        ButterKnife.bind(this, view);
         if (savedInstanceState != null) {
             page = savedInstanceState.getInt(ARG_PAGE, DEFAULT_PAGE);
+            mIsTwoPane = savedInstanceState.getBoolean(ARG_IS_TWO_PANE, false);
             prepareAdapter(savedInstanceState);
         } else {
+            mIsTwoPane = getArguments().getBoolean(ARG_IS_TWO_PANE, false);
             prepareAdapter(getArguments());
+
+            if (mIsTwoPane) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.activity_main_fragment_details,
+                                MovieDetailsFragment.newInstance((Movie) getArguments().getParcelableArrayList(ARG_MOVIES).get(0)))
+                        .commit();
+            }
         }
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_home_rv);
 
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
@@ -74,21 +91,20 @@ public class HomeFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
                 if (!firstLoad) {
                     if (!moviesAdapter.isLoading() && (recyclerView.getLayoutManager().getItemCount() - 1) ==
                             (((GridLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition())) {
-                        if (moviesAdapter.getLoadMoreListener() != null) {
+                        if (moviesAdapter.getLoadMoreListener() != null &&
+                                PreferenceManager.getSortingType(getContext()) != SortingType.FAVORITES) {
                             moviesAdapter.getLoadMoreListener().onLoad();
+                            moviesAdapter.setLoadingState(true);
                         }
-                        moviesAdapter.setLoadingState(true);
                     }
                 }
                 firstLoad = false;
             }
         });
         recyclerView.setAdapter(moviesAdapter);
-
         return view;
     }
 
@@ -96,6 +112,7 @@ public class HomeFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(ARG_PAGE, moviesAdapter.getCurrentPage());
         outState.putParcelableArrayList(ARG_MOVIES, moviesAdapter.getData());
+        outState.putBoolean(ARG_IS_TWO_PANE, mIsTwoPane);
         super.onSaveInstanceState(outState);
     }
 
@@ -109,7 +126,17 @@ public class HomeFragment extends Fragment {
     private MoviesAdapter.OnclickListener onclickListener = new MoviesAdapter.OnclickListener() {
         @Override
         public void onClick(View view, Movie movie) {
-            MovieDetailsActivity.launch(getActivity(), movie, view);
+            if (mIsTwoPane) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .addSharedElement(view, getResources()
+                                .getString(R.string.detail_iv_poster_transition))
+                        .replace(R.id.activity_main_fragment_details,
+                                MovieDetailsFragment.newInstance(movie))
+                        .commit();
+            } else {
+                MovieDetailsActivity.launchForResult(getActivity(), movie, view);
+            }
         }
     };
 

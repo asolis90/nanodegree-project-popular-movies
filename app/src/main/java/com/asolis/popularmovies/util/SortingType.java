@@ -7,7 +7,8 @@ package com.asolis.popularmovies.util;
 public enum SortingType {
 
     POPULAR(0, "popular"),
-    TOP_RATED(1, "top_rated");
+    TOP_RATED(1, "top_rated"),
+    FAVORITES(2, "favorites");
 
     private int value;
     private String path;
